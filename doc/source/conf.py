@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# afobj_doc documentation build configuration file, created by
+# afobj documentation build configuration file, created by
 # sphinx-quickstart on Tue Aug  1 11:47:23 2017.
 #
 # This file is execfile()d with the current directory set to its
@@ -32,6 +32,7 @@
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = ['sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',
     'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
     'sphinx.ext.coverage',
@@ -52,7 +53,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'afobj_doc'
+project = 'afobj'
 copyright = '2017, Yubo "Paul" Yang'
 author = 'Yubo "Paul" Yang'
 
@@ -89,7 +90,7 @@ todo_include_todos = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+html_theme = 'classic'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -109,11 +110,10 @@ html_static_path = ['_static']
 # refs: http://alabaster.readthedocs.io/en/latest/installation.html#sidebars
 html_sidebars = {
     '**': [
-        'about.html',
-        'navigation.html',
-        'relations.html',  # needs 'show_related': True theme option to display
         'searchbox.html',
-        'donate.html',
+        'globaltoc.html',
+        'relations.html',  # needs 'show_related': True theme option to display
+        #'sourcelink.html'
     ]
 }
 
@@ -121,7 +121,7 @@ html_sidebars = {
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'afobj_docdoc'
+htmlhelp_basename = 'afobjdoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -148,7 +148,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'afobj_doc.tex', 'afobj\\_doc Documentation',
+    (master_doc, 'afobj.tex', 'afobj\\_doc Documentation',
      'Yubo "Paul" Yang', 'manual'),
 ]
 
@@ -158,7 +158,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'afobj_doc', 'afobj_doc Documentation',
+    (master_doc, 'afobj', 'afobj Documentation',
      [author], 1)
 ]
 
@@ -169,8 +169,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'afobj_doc', 'afobj_doc Documentation',
-     author, 'afobj_doc', 'One line description of project.',
+    (master_doc, 'afobj', 'afobj Documentation',
+     author, 'afobj', 'One line description of project.',
      'Miscellaneous'),
 ]
 
