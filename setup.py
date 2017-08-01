@@ -8,5 +8,5 @@ setup(
   author_email   = 'yyang173@illinois.edu',
   url            = 'http://publish.illinois.edu/yubo-paul-yang/',
   packages       = ['afobj','afobj.input','afobj.output'],
-  install_requires = ['numpy','lxml']
+  install_requires = ['numpy','pandas','lxml']
 )
