@@ -10,3 +10,15 @@ def read_opt_log(flog):
 def get_xcols(cols):
   xcols = [col for col in cols if col.startswith('x')]
   return xcols
+
+def get_descriptors(df, extra_cols=[]):
+  xcols = get_xcols(df.columns)
+  xarr = df[extra_cols+xcols].values
+  return xarr
+
+def get_min(df):
+  xcols = get_xcols(df.columns)
+  z = df['emp2'].values
+  i = np.argmin(z)
+  xi = df.iloc[i][xcols].values
+  return z[i], xi
