@@ -16,6 +16,12 @@ def get_descriptors(df, extra_cols=[]):
   xarr = df[extra_cols+xcols].values
   return xarr
 
+def define_pcs(xarr, ncomp=2):
+  from sklearn.decomposition import PCA
+  pca = PCA(n_components=ncomp)
+  pca.fit(xarr)
+  return pca
+
 def get_min(df):
   xcols = get_xcols(df.columns)
   z = df['emp2'].values
