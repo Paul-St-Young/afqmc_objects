@@ -1,5 +1,58 @@
 import numpy as np
 
+# ========================== level 0: setup =========================
+def get_elem(qeinp):
+  with open(qeinp, 'r') as f:
+    lines = f.readlines()
+  for i, line in enumerate(lines):
+    if 'ATOMIC_SPECIES' in line:
+      break
+  elem = []
+  for line in lines[i+1:]:
+    tokens = line.split()
+    if len(tokens) != 3:
+      break
+    name, mass, pseudo = tokens
+    elem.append(name)
+  assert len(elem) > 0
+  return elem
+
+def get_input(qeinp, name):
+  with open(qeinp, 'r') as f:
+    lines = f.readlines()
+  for i, line in enumerate(lines):
+    if name in line:
+      out = line.split('=')[1]
+      outdir = out.split("'")[1]
+      return outdir
+
+def get_params(qeout):
+  with open(qeout, 'r') as f:
+    lines = f.readlines()
+  params = {}
+  for i, line in enumerate(lines):
+    if 'FFT dimensions' in line:
+      ffts = line.split('(')[-1].replace(')', '')
+      mesh = np.array(ffts.split(','), dtype=int)
+      break
+  params['mesh'] = mesh
+  lines = lines[i+1:]
+  for i, line in enumerate(lines):
+    if 'occupation numbers' in line:
+      break
+  lines = lines[i+1:]
+  occl = []
+  for i, line in enumerate(lines):
+    tokens = line.split()
+    if len(tokens) < 1:
+      break
+    occl += list(map(float, tokens))
+  nks = sum(occl)
+  nks = int(round(nks))
+  params['nks'] = nks
+  return params
+
+# ========================= level 0: gather =========================
 def read_opt_log(flog):
   from qharv.reel import scalar_dat
   with open(flog, 'r') as f:
