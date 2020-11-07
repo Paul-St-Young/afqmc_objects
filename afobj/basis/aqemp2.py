@@ -49,6 +49,7 @@ class QEGTO:
     outdir = kwargs.pop('outdir', 'qeout/') # !!!! must terminante with '/'
     if not outdir.endswith('/'):
       raise RuntimeError('"%s" does not end with "/"' % outdir)
+    prefix = kwargs.pop('prefix', 'pwscf')
     self.verbose = kwargs.pop('verbose', True)
     self.tmpdir = kwargs.pop('tmpdir', './')  # may not end in '/'
     self.atoms = atoms
@@ -56,6 +57,7 @@ class QEGTO:
     self.iteration = 0
     self.parameters = parameters
     self.default_parameters = dict(
+      prefix = prefix,
       outdir = outdir,
       gto_h5 = 'orbitals.h5',
     )
