@@ -6,6 +6,7 @@ class QEMP2(FileIOCalculator):
   implemented_properties = ['energy']
   default_parameters = dict(
     prefix = 'pwscf',
+    out_prefix = 'pwscf',
     eigcut = 1e-3,
     nextracut = 1e-6,
     verbose = '.true.',
@@ -17,8 +18,8 @@ class QEMP2(FileIOCalculator):
   def write_input(self, atoms, properties=None, system_changes=None):
     # extract needed parameters
     params = {}
-    required_params = ['prefix', 'outdir', 'nks', 'gto_h5', 'ngto',
-      'eigcut', 'nextracut', 'verbose']
+    required_params = ['prefix', 'out_prefix', 'outdir', 'gto_h5',
+      'nks', 'ngto', 'eigcut', 'nextracut', 'verbose']
     missing_params = []
     for key in required_params:
       if key in self.parameters:
@@ -34,6 +35,7 @@ class QEMP2(FileIOCalculator):
     super().write_input(atoms, properties, system_changes)
     text_fmt = '''&inputpp
   prefix = '{prefix:s}'
+  out_prefix = '{out_prefix:s}'
   outdir = '{outdir:s}'
   run_type = 'mp2_driver'
   diag_type = 'keep_occ'
