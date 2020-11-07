@@ -1,5 +1,7 @@
+import os
 import asyncio
 from ase.calculators.calculator import Calculator, CalculatorSetupError
+from ase.calculators.calculator import CalculationFailed
 from afobj.basis.qemp2 import QEMP2
 from afobj.basis.gto_h5 import gen_qe_gto
 
