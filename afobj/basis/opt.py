@@ -67,6 +67,7 @@ def read_opt_log(flog):
   return df.loc[sel].reset_index(drop=True)
 
 def read_qe_out(qe_out):
+  import pandas as pd
   from qharv.reel import ascii_out
   mm = ascii_out.read(qe_out)
   idx = ascii_out.all_lines_with_tag(mm, 'Exponents:')
