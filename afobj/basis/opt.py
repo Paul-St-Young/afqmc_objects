@@ -60,10 +60,44 @@ def read_opt_log(flog):
   text = '\n'.join(lines[:-1])  # skip last line (cur. best)
   df = scalar_dat.parse(text)
   xcols = get_xcols(df.columns)
-  # drop finite difference runs (from basinhopping)
-  nx = len(xcols)
-  sel = (df.icalc % (nx+1)) == 0
+  sel = np.ones(len(df), dtype=bool)
+  ## drop finite difference runs (from basinhopping)
+  #nx = len(xcols)
+  #sel = (df.icalc % (nx+1)) == 0
   return df.loc[sel].reset_index(drop=True)
+
+def read_qe_out(qe_out):
+  from qharv.reel import ascii_out
+  mm = ascii_out.read(qe_out)
+  idx = ascii_out.all_lines_with_tag(mm, 'Exponents:')
+  emp2s = []
+  expos = []
+  for i in idx:
+    mm.seek(i)
+    line = mm.readline().decode()
+    if '\\n' in line: continue
+    mm.seek(i)
+    text = ascii_out.block_text(mm, 'Exponents:', 'Driver Energy')
+    line = ascii_out.lr_mark(text, '[', ']')
+    x = list(map(float, line.split()))
+    j = mm.find(b'Driver Energy')
+    mm.seek(j)
+    line = mm.readline()
+    emp2 = float(line.split()[2])
+    emp2s.append(emp2)
+    expos.append(x)
+  ncalc = len(emp2s)
+  assert len(expos) == ncalc
+  entryl = []
+  for icalc in range(ncalc):
+    emp2 = emp2s[icalc]
+    entry = {'icalc': icalc, 'emp2': emp2}
+    x = expos[icalc]
+    for ix, x1 in enumerate(x):
+      entry['x%d' % ix] = x1
+    entryl.append(entry)
+  df = pd.DataFrame(entryl)
+  return df
 
 def get_xcols(cols):
   xcols = [col for col in cols if col.startswith('x')]
