@@ -52,6 +52,20 @@ def get_params(qeout):
   params['nks'] = nks
   return params
 
+def calc_lmax(x, ml=10):
+  nx = len(x)
+  for lmax in range(2, ml):
+    n2expect = (lmax+4)*(lmax-1)
+    if n2expect == 2*nx:
+      break
+  if lmax >= ml-1:
+    msg = 'increase ml=%d' % ml
+    raise RuntimeError(msg)
+  return lmax
+
+def index_nl(n, l):
+  return n*(n+5)//2+l
+
 # ========================= level 0: gather =========================
 def read_opt_log(flog):
   from qharv.reel import scalar_dat
