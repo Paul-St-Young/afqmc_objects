@@ -64,6 +64,7 @@ class QEGTO:
       gto_h5 = 'orbitals.h5',
     )
     self.clean_gto_h5 = kwargs.pop('clean_gto_h5', False)
+    self.calc = AQEMP2()
 
   async def get_mp2_energy(self, x, keep_qe_io=True):
     # get parameters
@@ -89,11 +90,10 @@ class QEGTO:
       os.path.abspath(path)
     )
     params['outdir'] = outdir
-    calc = AQEMP2()
-    calc.set(**params)
-    calc.directory = path
-    await calc.acalc(self.atoms)
-    emp2 = calc.get_potential_energy()
+    self.calc.set(**params)
+    self.calc.directory = path
+    await self.calc.acalc(self.atoms)
+    emp2 = self.calc.get_potential_energy()
     if self.verbose:
       print(self.iteration, emp2, *x, flush=True)
     if self.clean_gto_h5:

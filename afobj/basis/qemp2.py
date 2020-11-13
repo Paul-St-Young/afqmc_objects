@@ -55,7 +55,21 @@ class QEMP2(FileIOCalculator):
     fout = '%s.pwo' % self.label
     with open(fout, 'r') as f:
       lines = f.readlines()
+    # read band
+    evals = []
+    iline = 0
     for line in lines:
+      iline += 1
+      if 'Eigenvalues for k-point' in line:
+        break
+    for line in lines[iline:]:
+      iline += 1
+      if 'Starting MP2' in line:
+        break
+      ib, ev = list(map(float, line.split()))
+      evals.append(ev)
+    self.results['evals'] = evals
+    for line in lines[iline:]:
       if 'EMP2 (Ha)' in line:
         break
     et = line.split(':')[1]
