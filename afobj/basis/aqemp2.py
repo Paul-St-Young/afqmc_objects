@@ -68,9 +68,6 @@ class QEGTO:
     self.fband_h5 = kwargs.pop('fband_h5', 'band.h5')
     self.calc = AQEMP2()
 
-  def __del__(self):
-    self.fbh5.close()
-
   async def get_mp2_energy(self, x, keep_qe_io=True):
     # get parameters
     params = self.default_parameters.copy()
@@ -100,10 +97,10 @@ class QEGTO:
     emp2 = self.calc.get_potential_energy()
     if self.verbose:
       print(self.iteration, emp2, *x, flush=True)
-      self.fbh5 = h5py.File(self.fband_h5, 'a')
+      fbh5 = h5py.File(self.fband_h5, 'a')
       evals = self.calc.results['evals']
-      dset = self.fbh5.create_dataset(label, data=evals)
-      self.fbh5.close()
+      dset = fbh5.create_dataset(label, data=evals)
+      fbh5.close()
     if self.clean_gto_h5:
       import subprocess as sp
       sp.check_call(['rm', forb])
