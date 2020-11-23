@@ -66,7 +66,10 @@ class QEMP2(FileIOCalculator):
       iline += 1
       if 'Starting MP2' in line:
         break
-      ib, ev = list(map(float, line.split()))
+      toks = line.split()
+      if len(toks) == 0:
+        break
+      ib, ev = list(map(float, toks))
       evals.append(ev)
     self.results['evals'] = evals
     for line in lines[iline:]:
