@@ -51,10 +51,8 @@ class QEMP2(FileIOCalculator):
     with open(fin, 'w') as f:
       f.write(text)
 
-  def read_results(self):
-    fout = '%s.pwo' % self.label
-    with open(fout, 'r') as f:
-      lines = f.readlines()
+  def parse_results(self, lines):
+    results = {}
     # read band
     evals = []
     iline = 0
@@ -71,11 +69,24 @@ class QEMP2(FileIOCalculator):
         break
       ib, ev = list(map(float, toks))
       evals.append(ev)
-    self.results['evals'] = evals
+    if len(evals) > 0:
+      results['evals'] = evals
+    # read energy
+    found_emp2 = False
     for line in lines[iline:]:
       if 'EMP2 (Ha)' in line:
+        found_emp2 = True
         break
-    et = line.split(':')[1]
-    e1 = et.split(',')[0]
-    emp2 = float(e1.replace('(', ''))
-    self.results['energy'] = emp2
+    if found_emp2:
+      et = line.split(':')[1]
+      e1 = et.split(',')[0]
+      emp2 = float(e1.replace('(', ''))
+      results['energy'] = emp2
+    return results
+
+  def read_results(self):
+    fout = '%s.pwo' % self.label
+    with open(fout, 'r') as f:
+      lines = f.readlines()
+    results = parse_results(lines)
+    self.results.update(results)
