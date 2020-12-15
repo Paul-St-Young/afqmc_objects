@@ -65,7 +65,7 @@ class QEMP2(FileIOCalculator):
       if 'Starting MP2' in line:
         break
       toks = line.split()
-      if len(toks) == 0:
+      if len(toks) != 2:
         break
       ib, ev = list(map(float, toks))
       evals.append(ev)
@@ -88,5 +88,5 @@ class QEMP2(FileIOCalculator):
     fout = '%s.pwo' % self.label
     with open(fout, 'r') as f:
       lines = f.readlines()
-    results = parse_results(lines)
+    results = self.parse_results(lines)
     self.results.update(results)
