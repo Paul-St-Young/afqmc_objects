@@ -135,3 +135,34 @@ def get_min(df):
   i = np.argmin(z)
   xi = df.iloc[i][xcols].values
   return z[i], xi
+
+# ========================= level 1: constraint =========================
+class ExponentBounds(object):
+  def __init__(self, lmax):
+    self.lmax = lmax
+    self.nl = 3  # first shell has 3 bases
+  def __call__(self, **kwargs):
+    x = kwargs['x_new']
+    valid = True
+    lmax = self.lmax
+    for n in range(1, lmax-1):  # shell
+      for l in range(self.nl):  # tigher than last shell
+        i0 = index_nl(n-1, l)
+        expo0 = x[i0]
+        i1 = index_nl(n, l)
+        expo1 = x[i1]
+        if expo1 <= expo0:
+          valid = False
+          break
+    return valid
+  def make_valid(self, x):
+    lmax = self.lmax
+    for n in range(1, lmax-1):  # shell
+      for l in range(self.nl):  # tigher than last shell
+        i0 = index_nl(n-1, l)
+        expo0 = x[i0]
+        i1 = index_nl(n, l)
+        expo1 = x[i1]
+        if expo1 <= expo0:
+          x[i1] = expo0
+          x[i0] = expo1
