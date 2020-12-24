@@ -166,3 +166,18 @@ class ExponentBounds(object):
         if expo1 <= expo0:
           x[i1] = expo0
           x[i0] = expo1
+
+# ========================= level 2: orbital =========================
+def read_orbs(fh5):
+  import h5py
+  fp = h5py.File(fh5, 'r')
+  norb = fp['OrbsG/number_of_orbitals'][()][0]
+  psigl = []
+  for iorb in range(norb):
+    path = 'OrbsG/kp0_b%d' % iorb
+    carr = fp[path][()]
+    psig = carr[:, 0] + 1j*carr[:, 1]
+    psigl.append(psig)
+  fp.close()
+  cmat = np.array(psigl)
+  return cmat
