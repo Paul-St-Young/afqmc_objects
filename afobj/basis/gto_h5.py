@@ -26,6 +26,7 @@ def write_esh5_orbitals(cell, name, kpts):
   dset = grp.create_dataset("grid_type", data=int(0))
   nnr = cell.mesh[0]*cell.mesh[1]*cell.mesh[2]
   # loop over kpoints later
+  aol = []
   for (ik,k) in enumerate(kpts):
     ao = numint.KNumInt().eval_ao(cell, coords, k)[0]
     fac = np.exp(-1j * np.dot(coords, k))
@@ -33,22 +34,22 @@ def write_esh5_orbitals(cell, name, kpts):
       aoi = fac * np.asarray(ao[:,i].T, order='C')
       aoi_G = tools.fft(aoi, cell.mesh)
       aoi_G = aoi_G.reshape(cell.mesh).transpose(2,1,0).reshape(nnr)
+      aol.append(aoi_G)
       dset = grp.create_dataset('kp'+str(ik)+'_b'+str(i),
         data=to_qmcpack_complex(aoi_G)
       )
   fh5.close()
+  return np.array(aol)
 
-def gen_qe_gto(atoms, bset, x, kpts, fname='pyscf.orbitals.h5',
-  mesh=None, prec=1e-12):
+def gen_cell(atoms, bset, x, mesh=None, prec=1e-12, verbose=0):
   from pyscf import gto as molgto
   from pyscf.pbc.gto import Cell
-  assert(len(x) == bset.number_of_params)
   # extract info from ase atoms
   axes = atoms.get_cell()
   elem = atoms.get_chemical_symbols()
   pos = atoms.get_positions()
   cell = Cell()
-  cell.verbose = 0  # shut the cell up
+  cell.verbose = verbose  # shut the cell up
   cell.units = 'A'
   cell.precision = prec
   cell.a = axes
@@ -67,6 +68,12 @@ def gen_qe_gto(atoms, bset, x, kpts, fname='pyscf.orbitals.h5',
     )})
   cell.basis = basis
   cell.build()
+  return cell
+
+def gen_qe_gto(atoms, bset, x, kpts, fname='pyscf.orbitals.h5',
+  mesh=None, prec=1e-12, verbose=0):
+  assert(len(x) == bset.number_of_params)
+  cell = gen_cell(atoms, bset, x, mesh=mesh, prec=prec, verbose=verbose)
   nao = cell.nao_nr()
-  write_esh5_orbitals(cell, fname, kpts=kpts)
-  return nao
+  aos = write_esh5_orbitals(cell, fname, kpts=kpts)
+  return aos
