@@ -136,6 +136,41 @@ def get_min(df):
   xi = df.iloc[i][xcols].values
   return z[i], xi
 
+def default_contracted_basis(lmax, elems):
+  from afqmctools.utils.optimizable_basis_set import OptimizableBasisSet
+  from afqmctools.utils.optimizable_basis_set import EvenTemperedBasisBlock
+  from afqmctools.utils.optimizable_basis_set import BasisBlock
+  if (lmax < 2) or (lmax > 4):
+    raise NotImplementedError('lmax=%d not implemented' % lmax)
+  def contracted_shell(lmax, elem, expo_min=0.1, expo_max=10.0):
+    bbl = []
+    x0 = []  # initial guess
+    xbl = []  # bounds
+    for l, ang in zip(range(lmax+1), angs):
+      ng = 5-lmax-l
+      if ng > 1:
+        bb = EvenTemperedBasisBlock(elem, ang, n_gauss=ng)
+        x0 += [0.5+lmax] + [1.0]*ng
+        xbl += [(expo_min, expo_max)] + [(-1, 1)]*ng
+      else:
+        bb = BasisBlock(elem, ang)
+        x0 += [0.5+lmax]
+        xbl += [(expo_min, expo_max)]
+      bbl.append(bb)
+    return bbl, x0, xbl
+  x0 = []  # initial guess for parameters
+  xbounds = []
+  bset = OptimizableBasisSet(elems)
+  angs = ['S', 'P', 'D', 'F', 'G', 'H']
+  for elem in elems:
+    for lm in range(2, lmax+1):
+      bbl, x1, xb = contracted_shell(lm, elem)
+      x0 += x1
+      xbounds += xb
+      for bb in bbl:
+        bset.add(bb)
+  return bset, x0, xbounds
+
 # ========================= level 1: constraint =========================
 class ExponentBounds(object):
   def __init__(self, lmax):
