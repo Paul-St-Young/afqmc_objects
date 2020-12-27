@@ -76,4 +76,5 @@ def gen_qe_gto(atoms, bset, x, kpts, fname='pyscf.orbitals.h5',
   cell = gen_cell(atoms, bset, x, mesh=mesh, prec=prec, verbose=verbose)
   nao = cell.nao_nr()
   aos = write_esh5_orbitals(cell, fname, kpts=kpts)
-  return aos
+  #return aos
+  return nao
