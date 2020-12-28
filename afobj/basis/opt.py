@@ -171,6 +171,24 @@ def default_contracted_basis(lmax, elems):
         bset.add(bb)
   return bset, x0, xbounds
 
+# ========================= level 1: translate =========================
+def pyscf_expo_to_x0(expo, lmax):  # use to invert default_basis_set
+  xl = [[] for l in range(lmax-1)]
+  il = 0
+  l0 = 0
+  for entry in expo:
+    l1 = entry[0]
+    if l1 > l0:
+      il = 0
+      l0 = l1
+    alpha = entry[1][0]
+    xl[il].append(alpha)
+    il += 1
+  x0 = []
+  for x in xl[::-1]:
+    x0 += x
+  return x0
+
 # ========================= level 1: constraint =========================
 class ExponentBounds(object):
   def __init__(self, lmax):
