@@ -68,6 +68,28 @@ class QEGTO:
     self.fband_h5 = kwargs.pop('fband_h5', 'band.h5')
     self.calc = AQEMP2()
 
+  async def run(self, cmd):
+    proc = await asyncio.create_subprocess_shell(
+      cmd,
+      stdout=asyncio.subprocess.PIPE,
+      stderr=asyncio.subprocess.PIPE)
+    stdout, stderr = await proc.communicate()
+    return proc.returncode, stdout, stderr
+
+  def wpo_command(self, path, fgto_h5):
+    cmd = os.environ.get('WPO_COMMAND', None)
+    if cmd is None:
+      msg = 'please define WPO_COMMAND environment variable, e.g.\n'
+      msg += 'cd PATH; write_pyscf_orbitals.py FORB'
+      msg += '../scf.inp ../scf.out $lmax x0.dat\n'
+      raise RuntimeError(cmd)
+    for key in ['PATH', 'FORB']:
+      if key not in cmd:
+        msg = '%s must be in WPO_COMMAND' % key
+        raise RuntimeError(msg)
+    cmd = cmd.replace('PATH', path).replace('FORB', fgto_h5)
+    return cmd
+
   async def get_mp2_energy(self, x, keep_qe_io=True):
     # get parameters
     params = self.default_parameters.copy()
@@ -80,10 +102,30 @@ class QEGTO:
 
     # step 1: generate GTO orbitals
     forb = os.path.join(path, params['gto_h5'])
-    nao = gen_qe_gto(self.atoms, self.basis_set, x, params['kpts'],
-      mesh=params['mesh'], fname=forb)
-    params['ngto'] = nao
 
+    ## begin 2021-02-05 write all orbitals.h5 simultaneously
+    ##  call external program write_pyscf_orbitals.py in async subprocess
+    #nao = gen_qe_gto(self.atoms, self.basis_set, x, params['kpts'],
+    #  mesh=params['mesh'], fname=forb)
+    #params['ngto'] = nao
+
+    # execute write_pyscf_orbitals.py
+    cmd = self.wpo_command(path, params['gto_h5'])
+    # setup inputs for write_pyscf_orbitals.py
+    import numpy as np
+    fx0 = '%s/x0.dat' % path  # !!!! hard-coded filename
+    with open(fx0, 'w') as f:
+      np.savetxt(fx0, x)
+    # go to calculator path
+    ret = await self.run(cmd)
+    iret, out, err = ret
+    if iret != 0:
+      msg = 'failed to execut:\n%s' % cmd
+      raise RuntimeError(msg)
+    nao = int(out.decode().strip('\n'))
+    # end 2021-02-05 async write forb
+
+    params['ngto'] = nao
 
     # step 2: get MP2 energy
     outdir = os.path.relpath(
