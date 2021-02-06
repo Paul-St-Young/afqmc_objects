@@ -75,42 +75,42 @@ def read_opt_log(flog):
   df = scalar_dat.parse(text)
   xcols = get_xcols(df.columns)
   sel = np.ones(len(df), dtype=bool)
-  ## drop finite difference runs (from basinhopping)
-  #nx = len(xcols)
-  #sel = (df.icalc % (nx+1)) == 0
   return df.loc[sel].reset_index(drop=True)
 
-def read_qe_out(qe_out):
+def parse_expos(mm):
+  from qharv.reel import ascii_out
+  text = ascii_out.block_text(mm, 'Exponents:', 'Driver Energy')
+  xt = text.replace('\n', '')
+  xl = xt.split('[')[1].split(']')[0].split()
+  x = np.array(xl, dtype=float)
+  return x
+
+def parse_emp2(mm):
+  i = mm.find(b'Driver Energy')
+  mm.seek(i)
+  line = mm.readline().decode()
+  et = line.split('Energy')[1]
+  emp2 = float(et)
+  return emp2
+
+def read_qe_out(fqe):
   import pandas as pd
   from qharv.reel import ascii_out
-  mm = ascii_out.read(qe_out)
-  idx = ascii_out.all_lines_with_tag(mm, 'Exponents:')
-  emp2s = []
-  expos = []
-  for i in idx:
-    mm.seek(i)
-    line = mm.readline().decode()
-    if '\\n' in line: continue
-    mm.seek(i)
-    text = ascii_out.block_text(mm, 'Exponents:', 'Driver Energy')
-    line = ascii_out.lr_mark(text, '[', ']')
-    x = list(map(float, line.split()))
-    j = mm.find(b'Driver Energy')
-    mm.seek(j)
-    line = mm.readline()
-    emp2 = float(line.split()[2])
-    emp2s.append(emp2)
-    expos.append(x)
-  ncalc = len(emp2s)
-  assert len(expos) == ncalc
+  mm = ascii_out.read(fqe)
+  idxl = ascii_out.all_lines_with_tag(mm, 'Exponents:')
   entryl = []
-  for icalc in range(ncalc):
-    emp2 = emp2s[icalc]
+  for icalc, idx in enumerate(idxl):
+    mm.seek(idx)
+    try:
+      x = parse_expos(mm)
+      emp2 = parse_emp2(mm)
+    except Exception as err:
+      break
     entry = {'icalc': icalc, 'emp2': emp2}
-    x = expos[icalc]
-    for ix, x1 in enumerate(x):
-      entry['x%d' % ix] = x1
+    for i, x1 in enumerate(x):
+      entry['x%d' % i] = x1
     entryl.append(entry)
+  mm.close()
   df = pd.DataFrame(entryl)
   return df
 
