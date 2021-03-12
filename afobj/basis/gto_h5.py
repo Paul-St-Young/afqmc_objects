@@ -41,6 +41,12 @@ def write_esh5_orbitals(cell, name, kpts):
   fh5.close()
   return np.array(aol)
 
+def gen_cell_no_basis(atoms):
+  from pyscf.pbc.gto import Cell
+  cell = Cell()
+  cell.from_ase(atoms)
+  return cell
+
 def gen_cell(atoms, bset, x, mesh=None, prec=1e-12, verbose=0):
   from pyscf import gto as molgto
   from pyscf.pbc.gto import Cell
