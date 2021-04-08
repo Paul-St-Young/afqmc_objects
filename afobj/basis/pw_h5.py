@@ -37,5 +37,5 @@ def get_h1kin(kvecs, phik):
   nbas, npw1 = phik.shape
   assert npw1 == npw
   k2 = np.einsum('ki,ki->k', kvecs, kvecs)
-  h1 = np.einsum('ik,k,kj->ij', phik.conj(), k2/2, phik.T).real
+  h1 = np.einsum('ik,k,kj->ij', phik.conj(), k2/2, phik.T)
   return h1
