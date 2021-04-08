@@ -23,3 +23,19 @@ def get_orbs(forb):
     cmatl.append(np.array(cmat))
   fp.close()
   return kvl, cmatl
+
+def get_pw_basis(forb):
+  from scipy.linalg import block_diag
+  from afobj.basis.pw_h5 import get_orbs
+  kvl, cmatl = get_orbs(forb)
+  kvecs = np.concatenate(kvl, axis=0)
+  cmat = block_diag(*cmatl)  # (nbas, npw)
+  return kvecs, cmat
+
+def get_h1kin(kvecs, phik):
+  npw, ndim = kvecs.shape
+  nbas, npw1 = phik.shape
+  assert npw1 == npw
+  k2 = np.einsum('ki,ki->k', kvecs, kvecs)
+  h1 = np.einsum('ik,k,kj->ij', phik.conj(), k2/2, phik.T).real
+  return h1
