@@ -3,15 +3,15 @@ import numpy as np
 def get_orbs(forb):
   import h5py
   fp = h5py.File(forb, 'r')
-  raxes = fp['OrbsG/reciprocal_vectors'][()]
+  alat = fp['OrbsG/alat'][()][0]
   kpts = fp['OrbsG/kpoints'][()]
   nbl = fp['OrbsG/number_of_orbitals'][()]
   cmatl = []
   kvl = []
   for ik, (kpt, nb) in enumerate(zip(kpts, nbl)):
-    gvecs = fp['OrbsG/kp%d_gvectors' % ik][()]
+    gvecs = fp['OrbsG/kp%d_g' % ik][()]
     npw = len(gvecs)
-    kvecs = np.dot(gvecs+kpt, raxes)
+    kvecs = 2*np.pi/alat*(gvecs+kpt)
     kvl.append(kvecs)
     cmat = []
     for ib in range(nb):
