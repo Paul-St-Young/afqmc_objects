@@ -17,6 +17,12 @@ def get_elem(qeinp):
   assert len(elem) > 0
   return elem
 
+def get_nvir_per_atom(lmax):
+  nvir = 0
+  for l in range(2, lmax+1):
+    nvir += (l+1)**2
+  return nvir
+
 def get_input(qeinp, name):
   with open(qeinp, 'r') as f:
     lines = f.readlines()
