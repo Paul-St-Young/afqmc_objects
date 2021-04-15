@@ -29,8 +29,9 @@ def get_input(qeinp, name):
   for i, line in enumerate(lines):
     if name in line:
       out = line.split('=')[1]
-      outdir = out.split("'")[1]
-      return outdir
+      if "'" in out:
+        out = out.split("'")[1]
+      return out
 
 def get_params(qeout):
   with open(qeout, 'r') as f:
