@@ -52,14 +52,14 @@ def read_settings(qeinp, qeout):
   params['kpts'] = kpts
   return atoms, outdir, elem, params
 
-def write_orbs(fout, scf_inp, scf_out, lmax, x):
+def write_orbs(fout, scf_inp, scf_out, lmax, x, kc=None):
   from afqmctools.utils.optimizable_basis_set import default_basis_set
   from afobj.basis.gto_h5 import gen_qe_gto
   # read parameters
   atoms, outdir, elem, params = read_settings(scf_inp, scf_out)
   _, basis_set = default_basis_set(lmax, elem)
   nao = gen_qe_gto(atoms, basis_set, x, params['kpts'],
-    fname=fout, mesh=params['mesh'])
+    fname=fout, mesh=params['mesh'], kc=kc)
   return nao
 
 if __name__ == '__main__':
@@ -73,10 +73,12 @@ if __name__ == '__main__':
   parser.add_argument('scf_out', type=str)
   parser.add_argument('lmax', type=int)
   parser.add_argument('fx0', type=str)
+  parser.add_argument('--kcut', '-kc', type=float, default=None)
   args = parser.parse_args()
+  kc = args.kcut
 
   lmax = args.lmax
   x = np.loadtxt(args.fx0)
-  nao = write_orbs(args.forb, args.scf_inp, args.scf_out, lmax, x)
+  nao = write_orbs(args.forb, args.scf_inp, args.scf_out, lmax, x, kc=kc)
   print(nao)
 # end __main__
