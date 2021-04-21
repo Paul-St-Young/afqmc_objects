@@ -1,6 +1,6 @@
 import numpy as np
 
-def get_pw_kvecs(raxes, kc, kpt, nsh=5):
+def get_pw_kvecs(raxes, kc, kpt, nsh=5, kmin=1e-3):
   from qharv.inspect import axes_pos
   gvecs = axes_pos.cubic_pos(2*nsh+1)-nsh
   kvecs = kpt+np.dot(gvecs, raxes)
@@ -8,7 +8,7 @@ def get_pw_kvecs(raxes, kc, kpt, nsh=5):
   if kmags.max() <= kc:
     msg = 'increase nsh %d' % nsh
     raise RuntimeError(msg)
-  ksel = kmags < kc
+  ksel = (kmin < kmags) & (kmags < kc)
   return kvecs[ksel]
 
 def find_pw_kvecs(kvecs, raxes, kpt):
