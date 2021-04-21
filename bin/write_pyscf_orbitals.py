@@ -78,7 +78,10 @@ if __name__ == '__main__':
   kc = args.kcut
 
   lmax = args.lmax
-  x = np.loadtxt(args.fx0)
+  try:
+    x = np.loadtxt(args.fx0)
+  except ValueError:
+    x = args.fx0
   nao = write_orbs(args.forb, args.scf_inp, args.scf_out, lmax, x, kc=kc)
   print(nao)
 # end __main__

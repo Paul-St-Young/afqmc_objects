@@ -106,18 +106,50 @@ def gen_cell(atoms, bset, x, mesh=None, prec=1e-12, verbose=0):
   # build basis
   basis = {}
   for atm in elem:
-    basis.update({atm: molgto.parse(
-      bset.basis_str(atm, x)
-    )})
+    if type(x) is str:  # no need for bset
+      bstr = load_element(atm, x)
+    else:
+      bstr = bset.basis_str(atm, x)
+    basis.update({atm: molgto.parse(bstr)})
   cell.basis = basis
   cell.build()
   return cell
 
 def gen_qe_gto(atoms, bset, x, kpts, fname='pyscf.orbitals.h5',
   mesh=None, prec=1e-12, kc=None, verbose=0):
-  assert(len(x) == bset.number_of_params)
+  if type(x) is not str:
+    assert(len(x) == bset.number_of_params)
   cell = gen_cell(atoms, bset, x, mesh=mesh, prec=prec, verbose=verbose)
-  nao = cell.nao_nr()
+  #nao = cell.nao_nr()
   aos = write_esh5_orbitals(cell, fname, kpts=kpts, kc=kc)
   #return aos
   return len(aos)
+
+def load_element(symb, ftxt):
+  text = ''
+  fp = open(ftxt, 'r')
+  # step 1: find the start of basis section for this symbol
+  found = False
+  for line in fp:
+    first = line.split()[0]
+    try:
+      float(first)
+    except ValueError:
+      if first.lower() == symb.lower():
+        found = True
+        text += line
+        break
+  if not found:
+    msg = '"%s" not found in %s' % (symb, ftxt)
+    raise RuntimeError(msg)
+  # step 2: read until we get another symbol
+  for line in fp:
+    first = line.split()[0]
+    try:
+      float(first)
+    except ValueError:
+      if first.lower() != symb.lower():
+        break
+    text += line
+  fp.close()
+  return text
