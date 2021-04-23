@@ -54,6 +54,7 @@ class QEGTO:
     out_prefix = kwargs.pop('out_prefix', 'pwscf')
     self.verbose = kwargs.pop('verbose', True)
     self.tmpdir = kwargs.pop('tmpdir', './')  # may not end in '/'
+    self.write_str = kwargs.pop('write_str', False)
     self.atoms = atoms
     self.basis_set = basis_set
     self.iteration = 0
@@ -114,7 +115,13 @@ class QEGTO:
     # setup inputs for write_pyscf_orbitals.py
     import numpy as np
     fx0 = '%s/x0.dat' % path  # !!!! hard-coded filename
-    with open(fx0, 'w') as f:
+    if self.write_str:
+      elem = np.unique(self.atoms.get_chemical_symbols())
+      assert len(elem) == 1
+      with open(fx0, 'w') as f:
+        text = self.basis_set.basis_str(elem[0], x)
+        f.write(text)
+    else:
       np.savetxt(fx0, x)
     # go to calculator path
     ret = await self.run(cmd)
