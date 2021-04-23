@@ -73,6 +73,44 @@ def calc_lmax(x, ml=10):
 def index_nl(n, l):
   return n*(n+5)//2+l
 
+def default_contracted_shell(symb, l, n_gauss=4, beta=4.0):
+  if (l<2) or (l>5):
+    # add to "angs" and "x0_map"
+    msg = 'need to code for l=%d' % l
+    raise RuntimeError(msg)
+  from afqmctools.utils.optimizable_basis_set import EvenTemperedBasisBlock
+  # define ang. mom. channels and exponents
+  angs = ['S', 'P', 'D', 'F', 'G', 'H', 'I']
+  bblk = []
+  for i, ang in zip(range(l+1), angs):
+    b1 = EvenTemperedBasisBlock(symb, ang, n_gauss=n_gauss, beta=beta)
+    bblk.append(b1)
+  # define contraction coefficients
+  #x0_map = {  # initial guess
+  #  #                  S                 P                 D
+  #  2: [0.5,0.3,0.1,0.01, 0.5,0.3,0.1,0.01, 0.5,0.3,0.1,0.01]
+  #  #                  S                 P                 D                 F
+  #  3: [0.01,0.5,0.3,0.1, 0.01,0.5,0.3,0.1, 0.01,0.5,0.3,0.1]
+  #}
+  #bx0 = x0_map[l]
+  x4 =  [0.5, 0.3, 0.1, 0.01]  # generalize x0_map
+  for l1 in range(2, l):
+    x4 = [x4[-1]] + x4[:-1]
+  bx0 = (l+1)*x4
+  return bx0, bblk
+
+def default_contracted_basis(lmax, elems, **kwargs):
+  from afqmctools.utils.optimizable_basis_set import OptimizableBasisSet
+  bset = OptimizableBasisSet(elems)
+  x0 = []
+  for symb in elems:
+    for l in range(2, lmax+1):
+      x1, bblk = default_contracted_shell(symb, l, **kwargs)
+      x0 += x1
+      for b1 in bblk:
+        bset.add(b1)
+  return np.array(x0), bset
+
 # ========================= level 0: gather =========================
 def read_opt_log(flog):
   from qharv.reel import scalar_dat
@@ -143,7 +181,7 @@ def get_min(df):
   xi = df.iloc[i][xcols].values
   return z[i], xi
 
-def default_contracted_basis(lmax, elems):
+def default_small_contracted_basis(lmax, elems):
   from afqmctools.utils.optimizable_basis_set import OptimizableBasisSet
   from afqmctools.utils.optimizable_basis_set import EvenTemperedBasisBlock
   from afqmctools.utils.optimizable_basis_set import BasisBlock
