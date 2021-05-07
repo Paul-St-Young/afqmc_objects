@@ -17,7 +17,7 @@ def get_elem(qeinp):
   assert len(elem) > 0
   return elem
 
-def get_nexpo_per_atom(lmax):
+def get_nexpo_per_elem(lmax):
   return (lmax+4)*(lmax-1)//2
 
 def get_nvir_per_atom(lmax):
