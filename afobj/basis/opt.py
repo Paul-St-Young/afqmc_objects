@@ -34,6 +34,8 @@ def get_input(qeinp, name):
       out = line.split('=')[1]
       if "'" in out:
         out = out.split("'")[1]
+      if '"' in out:
+        out = out.split('"')[1]
       return out
 
 def get_params(qeout):
