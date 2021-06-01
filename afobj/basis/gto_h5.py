@@ -47,9 +47,6 @@ def write_esh5_orbitals(cell, name, kpts, kc=None):
     # add PW states first
     npw = 0
     if kc is not None:
-      if ik != 0:  # reminder to test k
-        msg = 'only Gamma is tested (ta21b)'
-        raise NotImplementedError(msg)
       raxes = cell.reciprocal_vectors()
       kvecs = get_pw_kvecs(raxes, kc, k)
       gvecs = find_pw_kvecs(kvecs, raxes, k)
