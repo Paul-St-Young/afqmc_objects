@@ -24,10 +24,14 @@ def calc_neq(finp, teq, min_block=8):
     raise RuntimeError(msg)
   return neq
 
-def get_mdf(floc, nequil):
+def get_mdf(floc, nequil, min_block=8):
   from qharv.reel import mole, scalar_dat
   from qharv.sieve import mean_df
   df0 = scalar_dat.read(floc)
+  nblock = len(df0)
+  if nequil >= nblock-min_block:
+    msg = 'refusing to throw out %d/%d blocks' % (nequil, nblock)
+    raise RuntimeError(msg)
   mdf = mean_df.create(df0.iloc[nequil:])
   # add metadata
   path = os.path.dirname(floc)
